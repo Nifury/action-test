@@ -11,16 +11,17 @@ jobs:
       - name: Create files
         shell: pwsh
         run: |
-          $files = @(
-            "ungoogled-chromium_146.0.7680.95-1.1_installer_arm64.exe",
-            "ungoogled-chromium_146.0.7680.95-1.1_installer_x64.exe",
-            "ungoogled-chromium_146.0.7680.95-1.1_installer_x86.exe",
-            "ungoogled-chromium_146.0.7680.95-1.1_windows_arm64.zip",
-            "ungoogled-chromium_146.0.7680.95-1.1_windows_x64.zip",
-            "ungoogled-chromium_146.0.7680.95-1.1_windows_x86.zip"
+          $urls = @(
+            "https://github.com/ungoogled-software/ungoogled-chromium-windows/releases/download/146.0.7680.71-1.1/ungoogled-chromium_146.0.7680.71-1.1_installer_arm64.exe",
+            "https://github.com/ungoogled-software/ungoogled-chromium-windows/releases/download/146.0.7680.71-1.1/ungoogled-chromium_146.0.7680.71-1.1_installer_x64.exe",
+            "https://github.com/ungoogled-software/ungoogled-chromium-windows/releases/download/146.0.7680.71-1.1/ungoogled-chromium_146.0.7680.71-1.1_installer_x86.exe",
+            "https://github.com/ungoogled-software/ungoogled-chromium-windows/releases/download/146.0.7680.71-1.1/ungoogled-chromium_146.0.7680.71-1.1_windows_arm64.zip",
+            "https://github.com/ungoogled-software/ungoogled-chromium-windows/releases/download/146.0.7680.71-1.1/ungoogled-chromium_146.0.7680.71-1.1_windows_x64.zip",
+            "https://github.com/ungoogled-software/ungoogled-chromium-windows/releases/download/146.0.7680.71-1.1/ungoogled-chromium_146.0.7680.71-1.1_windows_x86.zip"
           )
-          foreach ($file in $files) {
-            "hello" | Out-File -FilePath $file -NoNewline -Encoding ascii
+          foreach ($url in $urls) {
+            $file = (Split-Path $url -Leaf) -replace '\.71', '.97'
+            Invoke-WebRequest -Uri $url -OutFile $file
           }
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
