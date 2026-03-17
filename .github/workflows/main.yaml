@@ -1,0 +1,61 @@
+name: CI
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build-1:
+    runs-on: windows-2022
+    steps:
+      - name: Create files
+        shell: pwsh
+        run: |
+          $files = @(
+            "ungoogled-chromium_146.0.7680.95-1.1_installer_arm64.exe",
+            "ungoogled-chromium_146.0.7680.95-1.1_installer_x64.exe",
+            "ungoogled-chromium_146.0.7680.95-1.1_installer_x86.exe",
+            "ungoogled-chromium_146.0.7680.95-1.1_windows_arm64.zip",
+            "ungoogled-chromium_146.0.7680.95-1.1_windows_x64.zip",
+            "ungoogled-chromium_146.0.7680.95-1.1_windows_x86.zip"
+          )
+          foreach ($file in $files) {
+            "hello" | Out-File -FilePath $file -NoNewline -Encoding ascii
+          }
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: ungoogled-chromium*
+
+  publish-release:
+    needs: [build-1]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+      - name: Publish release
+        id: publish
+        uses: softprops/action-gh-release@v2
+        with:
+          fail_on_unmatched_files: true
+          files: |
+            ungoogled-chromium*
+    outputs:
+      assets: ${{ steps.publish.outputs.assets }}
+  publish-winget:
+    needs: publish-release
+    runs-on: ubuntu-slim
+    steps:
+      - name: Get version
+        id: version
+        run: echo "version=$(echo '${{ github.ref_name }}' | cut -d'-' -f1)" >> $GITHUB_OUTPUT
+      - uses: vedantmgoyal9/winget-releaser@main
+        with:
+          identifier: eloston.ungoogled-chromium
+          token: ${{ secrets.PAT }}
+          installers-regex: .(exe|zip)$
+          version: ${{ steps.version.outputs.version }}
+          fork-user: Nifury
