@@ -30,7 +30,7 @@ for c_path, c_name in config:
         lines.append(f'url = https://github.com/ungoogled-software/ungoogled-chromium-windows/releases/download/{tag}/{name}')
 
         with requests.get(f'https://github.com/ungoogled-software/ungoogled-chromium-windows/releases/download/{tag}/{name}', stream=True) as r:
-            r.raise_for_status()
+            # r.raise_for_status()
             hash_instances = [(h_name, h()) for h_name, h in hashes]
             for chunk in r.iter_content(65536):
                 for _, h in hash_instances:
